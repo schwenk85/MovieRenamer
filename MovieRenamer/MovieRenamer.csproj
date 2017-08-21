@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0B99BA5B-56B6-4AFF-AB9F-1E82C4D9FFDE}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MovieRenamer</RootNamespace>
+    <AssemblyName>MovieRenamer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="MVVM\Commands\MovieCollection_OpenCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_RenameMovieFolderCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_ReScanCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_SearchMovieFolderCommand.cs" />
+    <Compile Include="WebBrowserUtility.cs" />
+    <Page Include="MovieRenamerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MovieRenamerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Extensions.cs" />
+    <Compile Include="MovieCollection.cs" />
+    <Compile Include="MovieCollectionDirectory.cs" />
+    <Compile Include="MovieCollections.cs" />
+    <Compile Include="MovieFile.cs" />
+    <Compile Include="MovieFiles.cs" />
+    <Compile Include="MovieRenamerControl.xaml.cs">
+      <DependentUpon>MovieRenamerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MovieRenamerWindow.xaml.cs">
+      <DependentUpon>MovieRenamerWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MovieRenamerViewModel.cs" />
+    <Compile Include="MVVM\Commands\MovieCollections_NextCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollections_PreviousCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_RenameMovieCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_ResetCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_SaveCommand.cs" />
+    <Compile Include="MVVM\Commands\MovieCollection_SearchMovieCommand.cs" />
+    <Compile Include="MVVM\Commands\MoviesFolder_OpenCommand.cs" />
+    <Compile Include="MVVM\Commands\MoviesFolder_ScanCommand.cs" />
+    <Compile Include="MVVM\Converters\BlockingConverter.cs" />
+    <Compile Include="MVVM\Converters\DirectoryInfoToFolderNameConverter.cs" />
+    <Compile Include="MVVM\Converters\DirectoryToBrushConverter.cs" />
+    <Compile Include="MVVM\Converters\FileInfoToFileNameConverter.cs" />
+    <Compile Include="MVVM\Converters\MovieCollectionsCountConverter.cs" />
+    <Compile Include="MVVM\Converters\MoviesCountConverter.cs" />
+    <Compile Include="MVVM\Converters\SelectedMovieCollectionToStringConverter.cs" />
+    <Compile Include="MVVM\ObservableObject.cs" />
+    <Compile Include="MVVM\ViewModelBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
