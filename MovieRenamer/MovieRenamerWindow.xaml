@@ -1,14 +1,16 @@
 ﻿<Window x:Class="MovieRenamer.MovieRenamerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:my="clr-namespace:MovieRenamer"
         xmlns:converters="clr-namespace:MovieRenamer.MVVM.Converters"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignData MovieRenamerViewModel}"
         Title="Movie Renamer"
         Height="933" Width="1129"
         Loaded="Window_Loaded">
     <Window.Resources>
-        <my:MovieRenamerViewModel x:Key="MovieRenamerViewModel" />
-
         <converters:DirectoryToBrushConverter x:Key="Directory2Brush" />
         <converters:MovieCollectionsCountConverter x:Key="MovieCollectionCounter" />
         <converters:MoviesCountConverter x:Key="MoviesCounter" />
@@ -16,7 +18,7 @@
         <converters:BlockingConverter x:Key="BlockingConverter" x:Shared="False" />
     </Window.Resources>
 
-    <Grid Name="MainGrid" DataContext="{StaticResource MovieRenamerViewModel}">
+    <Grid>
         <Grid.InputBindings>
             <KeyBinding Command="{Binding MoviesFolderOpenCommand}" Gesture="CTRL+O" />
             <KeyBinding Command="{Binding MoviesFolderScanCommand}" Gesture="CTRL+F" />
