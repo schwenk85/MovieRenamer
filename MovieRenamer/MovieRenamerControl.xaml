@@ -1,9 +1,12 @@
 ﻿<UserControl x:Class="MovieRenamer.MovieRenamerControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MovieRenamer"
-             xmlns:converters="clr-namespace:MovieRenamer.MVVM.Converters">
-    
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             mc:Ignorable="d"
+             xmlns:movieRenamer="clr-namespace:MovieRenamer" 
+             d:DataContext="{d:DesignData MovieCollection}">
+
     <UserControl.Style>
         <Style TargetType="{x:Type UserControl}">
             <Style.Triggers>
@@ -13,17 +16,17 @@
             </Style.Triggers>
         </Style>
     </UserControl.Style>
-    
+
     <UserControl.Resources>
-        <Style x:Key="myListboxStyle">
+        <Style x:Key="MyListboxStyle">
             <Style.Resources>
-                <!-- Background of selected item when focussed -->
+                <!-- Background of selected item when focused -->
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="LightSteelBlue" />
-                <!-- Background of selected item when not focussed -->
+                <!-- Background of selected item when not focused -->
                 <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="LightSteelBlue" />
             </Style.Resources>
         </Style>
-        
+
         <!--<Style x:Key="myListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
             <Style.Triggers>
                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
@@ -32,17 +35,17 @@
             </Style.Triggers>
         </Style>-->
     </UserControl.Resources>
-    
+
     <UserControl.InputBindings>
-        <KeyBinding Command="{Binding MovieCollectionReset}" Gesture="CTRL+R" />
-        <KeyBinding Command="{Binding MovieCollectionSave}" Gesture="CTRL+S" />
-        <KeyBinding Command="{Binding SearchMovieFolder}" Gesture="CTRL+Down" />
-        <KeyBinding Command="{Binding SearchMovie}" Gesture="ALT+Down" />
-        <KeyBinding Command="{Binding RenameMovieFolder}" Gesture="CTRL+Up" />
-        <KeyBinding Command="{Binding RenameMovie}" Gesture="ALT+Up" />
+        <KeyBinding Command="{Binding ResetMovieCollectionCommand}" Gesture="CTRL+R" />
+        <KeyBinding Command="{Binding SaveMovieCollectionCommand}" Gesture="CTRL+S" />
+        <KeyBinding Command="{Binding SearchMovieFolderCommand}" Gesture="CTRL+Down" />
+        <KeyBinding Command="{Binding SearchMovieCommand}" Gesture="ALT+Down" />
+        <KeyBinding Command="{Binding RenameMovieFolderCommand}" Gesture="CTRL+Up" />
+        <KeyBinding Command="{Binding RenameMovieCommand}" Gesture="ALT+Up" />
     </UserControl.InputBindings>
-    
-    <Grid Name="gridOriginalNew">
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="35" />
             <RowDefinition Height="28" />
@@ -58,102 +61,76 @@
         </Grid.ColumnDefinitions>
 
         <GridSplitter Grid.Column="1" Grid.RowSpan="6"
-                          Width="5" Background="LightGray" 
-                          HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                          ResizeBehavior="PreviousAndNext" ShowsPreview="False" />
+                      Width="5" Background="LightGray"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                      ResizeBehavior="PreviousAndNext" ShowsPreview="False" />
 
         <Grid Grid.Row="0" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnOpenMovieFolder" Content="Open Movie Folder"
-                    Grid.Column="0"
-                    Command="{Binding MovieCollectionOpen}" />
-            <Button Name="btnReScanMovieCollection" Content="ReScan Movie Collection"
-                    Grid.Column="1"
-                    Command="{Binding MovieCollectionReScan}" />
+            <Button Content="Open Movie Folder" Grid.Column="0" Command="{Binding OpenMovieFolderCommand}" />
+            <Button Content="ReScan Movie Collection" Grid.Column="1" Command="{Binding ReScanMovieCollectionCommand}" />
         </Grid>
-        
+
         <Grid Grid.Row="0" Grid.Column="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnReset" Content="Reset" ToolTip="Ctrl+R"
-                    Grid.Column="0"
-                    Command="{Binding MovieCollectionReset}" />
-            <Button Name="btnSave" Content="Save" ToolTip="Ctrl+S"
-                    Grid.Column="1"
-                    Command="{Binding MovieCollectionSave}" />
+            <Button Content="Reset" ToolTip="Ctrl+R" Grid.Column="0" Command="{Binding ResetMovieCollectionCommand}" />
+            <Button Content="Save" ToolTip="Ctrl+S" Grid.Column="1" Command="{Binding SaveMovieCollectionCommand}" />
         </Grid>
 
-        <Label Name="lblOriginalFoldername" Content="Original Foldername"
-               Grid.Row="1" Grid.Column="0" 
-               HorizontalContentAlignment="Center" />
-        <Label Name="lblNewFoldername" Content="New Foldername" 
-               Grid.Row="1" Grid.Column="2"
-               HorizontalContentAlignment="Center" />
+        <Label Content="Original Folder Name" Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Center" />
+        <Label Content="New Folder Name" Grid.Row="1" Grid.Column="2" HorizontalContentAlignment="Center" />
 
-        <TextBox Name="txtMovieOriginalFoldername" Foreground="Gray" IsReadOnly="True" 
-                 Grid.Row="2" Grid.Column="0"
-                 Text="{Binding MovieCollectionDirectory.OriginalMovieCollectionName, 
-                                UpdateSourceTrigger=PropertyChanged}"  />
-        <TextBox Name="txtMovieNewFoldername"  
-                 Grid.Row="2" Grid.Column="2"
-                 Text="{Binding MovieCollectionDirectory.NewMovieCollectionName, 
-                                UpdateSourceTrigger=PropertyChanged}" 
+        <TextBox Foreground="Gray" IsReadOnly="True" Grid.Row="2" Grid.Column="0"
+                 Text="{Binding MovieCollectionDirectory.OriginalMovieCollectionName, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Grid.Row="2" Grid.Column="2"
+                 Text="{Binding MovieCollectionDirectory.NewMovieCollectionName, UpdateSourceTrigger=PropertyChanged}"
                  PreviewTextInput="OnPreviewTextInput" />
 
-        <Label Name="lblOriginalFilenames" Content="Original Filenames" 
-               Grid.Row="3" Grid.Column="0"
-               HorizontalContentAlignment="Center" />
-        <Label Name="lblNewFilenames" Content="New Filenames" 
-               Grid.Row="3" Grid.Column="2"
-               HorizontalContentAlignment="Center" />
+        <Label Content="Original File Names" Grid.Row="3" Grid.Column="0" HorizontalContentAlignment="Center" />
+        <Label Content="New File Names" Grid.Row="3" Grid.Column="2" HorizontalContentAlignment="Center" />
 
         <!--ItemContainerStyle="{StaticResource myListBoxItemStyle}"-->
-        <ListBox Name="lbxOriginalFileNames" 
-                 ItemsSource="{Binding Movies}" 
+        <ListBox Name="ListBoxOriginalFileNames"
+                 ItemsSource="{Binding Movies}"
                  SelectedItem="{Binding SelectedMovie}"
-                 Style="{StaticResource myListboxStyle}"
+                 Style="{StaticResource MyListboxStyle}"
                  BorderThickness="0"
                  HorizontalContentAlignment="Stretch"
                  Grid.Row="4" Grid.Column="0">
             <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate DataType="movieRenamer:MovieFile">
                     <DockPanel LastChildFill="True">
-                        <Button Name="btnPlay" Content=">" Width="30" DockPanel.Dock="Right" Click="btnPlay_Click" />
-                        <TextBox Name="txtOriginalFileNames"
-                             IsReadOnly="True"
-                             Foreground="Gray"
-                             Background="Transparent"
-                             HorizontalAlignment="Stretch"
-                             Text="{Binding OriginalMovieName, 
-                                            UpdateSourceTrigger=PropertyChanged}" 
-                             GotFocus="OnChildGotFocus" />
+                        <Button Content=">" Width="30" DockPanel.Dock="Right" Click="ButtonPlay_Click" />
+                        <TextBox IsReadOnly="True"
+                                 Foreground="Gray"
+                                 Background="Transparent"
+                                 HorizontalAlignment="Stretch"
+                                 Text="{Binding OriginalMovieName, UpdateSourceTrigger=PropertyChanged}"
+                                 GotFocus="OnChildGotFocus" />
                     </DockPanel>
-                   
+
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
         <!--ItemContainerStyle="{StaticResource myListBoxItemStyle}"-->
-        <ListBox Name="lbxNewFileNames" 
-                 ItemsSource="{Binding Movies}"
+        <ListBox ItemsSource="{Binding Movies}"
                  SelectedItem="{Binding SelectedMovie}"
-                 Style="{StaticResource myListboxStyle}"
+                 Style="{StaticResource MyListboxStyle}"
                  BorderThickness="0"
                  HorizontalContentAlignment="Stretch"
                  Grid.Row="4" Grid.Column="2">
             <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBox Name="txtNewFileNames" 
-                             Background="Transparent"
+                <DataTemplate DataType="movieRenamer:MovieFile">
+                    <TextBox Background="Transparent"
                              HorizontalAlignment="Stretch"
-                             Text="{Binding NewMovieName, 
-                                            UpdateSourceTrigger=PropertyChanged,
-                                            Mode=TwoWay}"
+                             Text="{Binding NewMovieName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              GotFocus="OnChildGotFocus"
                              PreviewTextInput="OnPreviewTextInput" />
                 </DataTemplate>
@@ -165,12 +142,10 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnSearchMovieFolder" Content="Search Movie Folder" ToolTip="Ctrl+Down"
-                    Grid.Column="0"
-                    Command="{Binding SearchMovieFolder}" />
-            <Button Name="btnSearchMovie" Content="Search Movie File" ToolTip="Alt+Down"
-                    Grid.Column="1"
-                    Command="{Binding SearchMovie}" />
+            <Button Content="Search Movie Folder" ToolTip="Ctrl+Down" Grid.Column="0"
+                    Command="{Binding SearchMovieFolderCommand}" />
+            <Button Content="Search Movie File" ToolTip="Alt+Down" Grid.Column="1"
+                    Command="{Binding SearchMovieCommand}" />
         </Grid>
 
         <Grid Grid.Row="5" Grid.Column="2">
@@ -178,12 +153,9 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnRenameMovieFolder" Content="Rename Movie Folder" ToolTip="Ctrl+Up"
-                    Grid.Column="0"
-                    Command="{Binding RenameMovieFolder}" />
-            <Button Name="btnRenameMovie" Content="Rename Movie File" ToolTip="Alt+Up"
-                    Grid.Column="1"
-                    Command="{Binding RenameMovie}" />
+            <Button Content="Rename Movie Folder" ToolTip="Ctrl+Up" Grid.Column="0"
+                    Command="{Binding RenameMovieFolderCommand}" />
+            <Button Content="Rename Movie File" ToolTip="Alt+Up" Grid.Column="1" Command="{Binding RenameMovieCommand}" />
         </Grid>
 
     </Grid>

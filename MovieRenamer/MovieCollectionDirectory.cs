@@ -1,73 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MovieRenamer.MVVM;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Windows;
+using MovieRenamer.MVVM;
 
 namespace MovieRenamer
 {
     public class MovieCollectionDirectory : ObservableObject
     {
-        #region Fields
-
-        protected DirectoryInfo _OriginalMovieCollectionDirectory;
-        protected string _OriginalMovieCollectionName;
-        protected string _NewMovieCollectionName;
-
-        #endregion
-        
-        #region Constructors
-
-        public MovieCollectionDirectory(MovieCollection parent)
-        {
-            Parent = parent;
-
-            _OriginalMovieCollectionDirectory = null;
-            _OriginalMovieCollectionName = string.Empty;
-            _NewMovieCollectionName = string.Empty;
-        }
-
-        #endregion
-
-        #region Data Properties
-
-        public MovieCollection Parent { get; set; }
+        private string _newMovieCollectionName = string.Empty;
+        private DirectoryInfo _originalMovieCollectionDirectory;
+        private string _originalMovieCollectionName = string.Empty;
 
         public DirectoryInfo OriginalMovieCollectionDirectory
         {
-            get { return _OriginalMovieCollectionDirectory; }
-            set
-            {
-                _OriginalMovieCollectionDirectory = value;
-                base.RaisePropertyChangedEvent("OriginalMovieCollectionDirectory");
-            }
+            get => _originalMovieCollectionDirectory;
+            set => SetProperty(ref _originalMovieCollectionDirectory, value);
         }
 
         public string OriginalMovieCollectionName
         {
-            get { return _OriginalMovieCollectionName; }
-            set
-            {
-                _OriginalMovieCollectionName = value;
-                base.RaisePropertyChangedEvent("OriginalMovieCollectionName");
-            }
+            get => _originalMovieCollectionName;
+            set => SetProperty(ref _originalMovieCollectionName, value);
         }
 
         public string NewMovieCollectionName
         {
-            get { return _NewMovieCollectionName; }
-            set
-            {
-                _NewMovieCollectionName = value.RemoveBadCharacters();
-                base.RaisePropertyChangedEvent("NewMovieCollectionName");
-            }
+            get => _newMovieCollectionName;
+            set => SetProperty(ref _newMovieCollectionName, value.RemoveBadCharacters());
         }
-
-        #endregion
-
-        #region Methods
 
         public void Read(DirectoryInfo movieCollectionDirectory)
         {
@@ -84,27 +44,34 @@ namespace MovieRenamer
 
         public void Write()
         {
-            if (OriginalMovieCollectionDirectory != null && 
-                OriginalMovieCollectionDirectory.Exists)
+            if (OriginalMovieCollectionDirectory == null || !OriginalMovieCollectionDirectory.Exists)
             {
-                _NewMovieCollectionName = _NewMovieCollectionName.TrimEnd(new char[] { '.' });
+                return;
+            }
 
-                if (!string.IsNullOrWhiteSpace(NewMovieCollectionName) &&
-                    NewMovieCollectionName != OriginalMovieCollectionName)
+            _newMovieCollectionName = _newMovieCollectionName.TrimEnd('.');
+
+            if (string.IsNullOrWhiteSpace(NewMovieCollectionName) ||
+                NewMovieCollectionName == OriginalMovieCollectionName)
+            {
+                return;
+            }
+
+            try
+            {
+                if (_originalMovieCollectionDirectory.Parent != null)
                 {
-                    try
-                    {
-                        OriginalMovieCollectionDirectory.MoveTo(_OriginalMovieCollectionDirectory.Parent.FullName + "\\" + _NewMovieCollectionName);
-                        Reset();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Windows.MessageBox.Show("Foldername " + _NewMovieCollectionName + " cannot be written.\n\n" + ex.Message);
-                    }
+                    OriginalMovieCollectionDirectory.MoveTo(
+                        _originalMovieCollectionDirectory.Parent.FullName + @"\" + _newMovieCollectionName);
                 }
+
+                Reset();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Folder Name '{_newMovieCollectionName}' cannot be written.\n\n" + ex.Message);
             }
         }
-
-        #endregion
     }
 }

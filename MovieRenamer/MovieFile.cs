@@ -1,73 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MovieRenamer.MVVM;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Windows;
+using MovieRenamer.MVVM;
 
 namespace MovieRenamer
 {
     public class MovieFile : ObservableObject, IComparable
     {
-        #region Fields
-
-        protected FileInfo _OriginalMovieFile;
-        protected string _OriginalMovieName;
-        protected string _NewMovieName;
-
-        #endregion
-        
-        #region Constructors
-
-        public MovieFile(MovieFiles parent)
-        {
-            Parent = parent;
-
-            _OriginalMovieFile = null;
-            _OriginalMovieName = string.Empty;
-            _NewMovieName = string.Empty;
-        }
-
-        #endregion
-
-        #region Data Properties
-
-        public MovieFiles Parent { get; set; }
+        private string _newMovieName = string.Empty;
+        private FileInfo _originalMovieFile;
+        private string _originalMovieName = string.Empty;
 
         public FileInfo OriginalMovieFile
         {
-            get { return _OriginalMovieFile; }
-            set
-            {
-                _OriginalMovieFile = value;
-                base.RaisePropertyChangedEvent("OriginalMovieFile");
-            }
+            get => _originalMovieFile;
+            set => SetProperty(ref _originalMovieFile, value);
         }
 
         public string OriginalMovieName
         {
-            get { return _OriginalMovieName; }
-            set
-            {
-                _OriginalMovieName = value;
-                base.RaisePropertyChangedEvent("OriginalMovieName");
-            }
+            get => _originalMovieName;
+            set => SetProperty(ref _originalMovieName, value);
         }
 
         public string NewMovieName
         {
-            get { return _NewMovieName; }
-            set
-            {
-                _NewMovieName = value.RemoveBadCharacters();
-                base.RaisePropertyChangedEvent("NewMovieName");
-            }
+            get => _newMovieName;
+            set => SetProperty(ref _newMovieName, value.RemoveBadCharacters());
         }
 
-        #endregion
+        public int CompareTo(object obj)
+        {
+            if (!(obj is MovieFile movieFile))
+            {
+                throw new ArgumentException("Object is not a MovieFile");
+            }
 
-        #region Methods
+            return string.Compare(OriginalMovieName, movieFile.OriginalMovieName, StringComparison.Ordinal);
+        }
 
         public void Read(FileInfo movie)
         {
@@ -78,8 +48,8 @@ namespace MovieRenamer
 
         public void Reset()
         {
-            int movieNameLength = OriginalMovieFile.Name.Length - OriginalMovieFile.Extension.Length;
-            string movieName = OriginalMovieFile.Name.Remove(movieNameLength);
+            var movieNameLength = OriginalMovieFile.Name.Length - OriginalMovieFile.Extension.Length;
+            var movieName = OriginalMovieFile.Name.Remove(movieNameLength);
 
             OriginalMovieName = movieName;
             NewMovieName = movieName;
@@ -87,39 +57,26 @@ namespace MovieRenamer
 
         public void Write()
         {
-            if (OriginalMovieFile != null && 
-                OriginalMovieFile.Exists)
+            if (OriginalMovieFile == null || !OriginalMovieFile.Exists)
             {
-                if (!string.IsNullOrWhiteSpace(NewMovieName) && 
-                    NewMovieName != OriginalMovieName)
-                {
-                    try
-                    { 
-                        OriginalMovieFile.MoveTo(_OriginalMovieFile.DirectoryName + "\\" + _NewMovieName + _OriginalMovieFile.Extension);
-                        Reset();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Windows.MessageBox.Show("Filename " + _NewMovieName + " cannot be written.\n\n" + ex.Message);
-                    }
-                }
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewMovieName) || NewMovieName == OriginalMovieName)
+            {
+                return;
+            }
+
+            try
+            {
+                OriginalMovieFile.MoveTo(
+                    _originalMovieFile.DirectoryName + @"\" + _newMovieName + _originalMovieFile.Extension);
+                Reset();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Filename '{_newMovieName}' cannot be written.\n\n" + ex.Message);
             }
         }
-
-        #endregion
-
-        #region Compare
-
-        public int CompareTo(object obj)
-        {
-            MovieFile movieFile = obj as MovieFile;
-            if (movieFile == null)
-            {
-                throw new ArgumentException("Object is not MovieFile");
-            }
-            return this.OriginalMovieName.CompareTo(movieFile.OriginalMovieName);
-        }
-
-        #endregion
     }
 }

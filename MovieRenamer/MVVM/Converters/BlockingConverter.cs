@@ -1,24 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Data;
 using System.Globalization;
+using System.Windows.Data;
 
 namespace MovieRenamer.MVVM.Converters
 {
-    class BlockingConverter : IValueConverter
+    public class BlockingConverter : IValueConverter
     {
-        public object lastValue;
+        private object _lastValue;
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return lastValue;
+            return _lastValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            lastValue = value;
+            _lastValue = value;
             return value;
         }
     }

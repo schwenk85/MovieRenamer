@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MovieRenamer</RootNamespace>
     <AssemblyName>MovieRenamer</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -25,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -34,6 +36,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -57,10 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MVVM\Commands\MovieCollection_OpenCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_RenameMovieFolderCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_ReScanCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_SearchMovieFolderCommand.cs" />
+    <Compile Include="MVVM\Commands\RelayCommand.cs" />
     <Compile Include="WebBrowserUtility.cs" />
     <Page Include="MovieRenamerControl.xaml">
       <SubType>Designer</SubType>
@@ -77,9 +77,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="MovieCollection.cs" />
     <Compile Include="MovieCollectionDirectory.cs" />
-    <Compile Include="MovieCollections.cs" />
     <Compile Include="MovieFile.cs" />
-    <Compile Include="MovieFiles.cs" />
     <Compile Include="MovieRenamerControl.xaml.cs">
       <DependentUpon>MovieRenamerControl.xaml</DependentUpon>
     </Compile>
@@ -90,14 +88,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MovieRenamerViewModel.cs" />
-    <Compile Include="MVVM\Commands\MovieCollections_NextCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollections_PreviousCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_RenameMovieCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_ResetCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_SaveCommand.cs" />
-    <Compile Include="MVVM\Commands\MovieCollection_SearchMovieCommand.cs" />
-    <Compile Include="MVVM\Commands\MoviesFolder_OpenCommand.cs" />
-    <Compile Include="MVVM\Commands\MoviesFolder_ScanCommand.cs" />
     <Compile Include="MVVM\Converters\BlockingConverter.cs" />
     <Compile Include="MVVM\Converters\DirectoryInfoToFolderNameConverter.cs" />
     <Compile Include="MVVM\Converters\DirectoryToBrushConverter.cs" />
@@ -106,7 +96,6 @@
     <Compile Include="MVVM\Converters\MoviesCountConverter.cs" />
     <Compile Include="MVVM\Converters\SelectedMovieCollectionToStringConverter.cs" />
     <Compile Include="MVVM\ObservableObject.cs" />
-    <Compile Include="MVVM\ViewModelBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -124,6 +113,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

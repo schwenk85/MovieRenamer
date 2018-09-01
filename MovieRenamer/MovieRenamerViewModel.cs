@@ -1,121 +1,129 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MovieRenamer.MVVM;
+﻿using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 using System.Windows.Input;
+using MovieRenamer.MVVM;
 using MovieRenamer.MVVM.Commands;
 
 namespace MovieRenamer
 {
-    public class MovieRenamerViewModel : ViewModelBase
+    public class MovieRenamerViewModel : ObservableObject
     {
-        #region Fields
-
-        protected string _MoviesFolder;
-        protected MovieCollections _MovieCollections;
-        protected MovieCollection _SelectedMovieCollection;
-
-        #endregion
-
-        #region Constructors
-
-        public MovieRenamerViewModel()
-        {
-            //_MoviesFolder = string.Empty;
-            _MoviesFolder = "Z:\\Filme.deutsch\\AVI";
-            _MovieCollections = new MovieCollections(this);
-            _SelectedMovieCollection = null;
-
-            MoviesFolderOpen = new MoviesFolder_OpenCommand(this);
-            MoviesFolderScan = new MoviesFolder_ScanCommand(this);
-
-            MovieCollectionsPrevious = new MovieCollections_PreviousCommand(this);
-            MovieCollectionsNext = new MovieCollections_NextCommand(this);
-        }
-
-        #endregion
-
-        #region Data Properties
+        private ObservableCollection<MovieCollection> _movieCollections =
+            new ObservableCollection<MovieCollection>();
+        private RelayCommand _setNextMovieCollectionCommand;
+        private RelayCommand _setPreviousMovieCollectionCommand;
+        private string _moviesFolder = @"Z:\Movies\MKV";
+        private RelayCommand _moviesFolderOpenCommand;
+        private RelayCommand _moviesFolderScanCommand;
+        private MovieCollection _selectedMovieCollection;
 
         public string MoviesFolder
         {
-            get { return _MoviesFolder; }
-            set
-            {
-                _MoviesFolder = value;
-                base.RaisePropertyChangedEvent("MoviesFolder");
-            }
+            get => _moviesFolder;
+            set => SetProperty(ref _moviesFolder, value);
         }
 
-        public MovieCollections MovieCollections
+        public ObservableCollection<MovieCollection> MovieCollections
         {
-            get { return _MovieCollections; }
-            set
-            {
-                _MovieCollections = value;
-                base.RaisePropertyChangedEvent("MovieCollections");
-            }
+            get => _movieCollections;
+            set => SetProperty(ref _movieCollections, value);
         }
 
         public MovieCollection SelectedMovieCollection
         {
-            get { return _SelectedMovieCollection; }
-            set
+            get => _selectedMovieCollection;
+            set => SetProperty(ref _selectedMovieCollection, value);
+        }
+
+        public ICommand MoviesFolderOpenCommand
+        {
+            get
             {
-                _SelectedMovieCollection = value;
-                base.RaisePropertyChangedEvent("SelectedMovieCollection");
+                return _moviesFolderOpenCommand ?? (_moviesFolderOpenCommand =
+                           new RelayCommand(param => GetMoviesFolderPath()));
             }
         }
 
-        #endregion
-
-        #region Command Properties
-
-        public ICommand MoviesFolderOpen { get; set; }
-        public ICommand MoviesFolderScan { get; set; }
-
-        public ICommand MovieCollectionsPrevious { get; set; }
-        public ICommand MovieCollectionsNext { get; set; }
-
-        #endregion
-
-        #region Methods
-
-        public void ReadMovieCollections()
+        public ICommand MoviesFolderScanCommand
         {
-            MovieCollections.Read(new DirectoryInfo(MoviesFolder));
+            get
+            {
+                return _moviesFolderScanCommand ?? (_moviesFolderScanCommand =
+                           new RelayCommand(
+                               param => ReadMovieCollections(),
+                               param => Directory.Exists(MoviesFolder)));
+            }
+        }
+
+        public ICommand SetPreviousMovieCollectionCommand
+        {
+            get
+            {
+                return _setPreviousMovieCollectionCommand ?? (_setPreviousMovieCollectionCommand =
+                           new RelayCommand(
+                               param => SetPreviousMovieCollection(),
+                               param => MovieCollections.Any()));
+            }
+        }
+
+        public ICommand SetNextMovieCollectionCommand
+        {
+            get
+            {
+                return _setNextMovieCollectionCommand ?? (_setNextMovieCollectionCommand =
+                           new RelayCommand(
+                               param => SetNextMovieCollection(),
+                               param => MovieCollections.Any()));
+            }
+        }
+        
+        private void GetMoviesFolderPath()
+        {
+            var dialog = new FolderBrowserDialog();
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                MoviesFolder = dialog.SelectedPath;
+            }
+        }
+
+        private void ReadMovieCollections()
+        {
+            var moviesDirectory = new DirectoryInfo(MoviesFolder);
+
+            if (moviesDirectory.Exists)
+            {
+                MovieCollections.Clear();
+
+                var movieCollectionDirectories = moviesDirectory.GetDirectories();
+                foreach (var movieCollectionDirectory in movieCollectionDirectories)
+                {
+                    var movieCollection = new MovieCollection();
+                    movieCollection.Read(movieCollectionDirectory);
+                    MovieCollections.Add(movieCollection);
+                }
+
+                MovieCollections.BubbleSort();
+            }
+
             RaisePropertyChangedEvent("MovieCollections");
 
-            if (MovieCollections.Count > 0)
+            if (MovieCollections.Any())
+            {
                 SelectedMovieCollection = MovieCollections[0];
+            }
         }
 
-        public void SetNextMovieCollection()
+        private void SetPreviousMovieCollection()
         {
-            int index = MovieCollections.IndexOf(SelectedMovieCollection);
-
-            if (index < 0)
-                SelectedMovieCollection = null;
-            else if (index == MovieCollections.Count - 1)
-                SelectedMovieCollection = MovieCollections[0];
-            else
-                SelectedMovieCollection = MovieCollections[index + 1];
+            SelectedMovieCollection = MovieCollections.GetPrevious(SelectedMovieCollection);
         }
 
-        public void SetPreviousMovieCollection()
+        private void SetNextMovieCollection()
         {
-            int index = MovieCollections.IndexOf(SelectedMovieCollection);
-
-            if (index < 0)
-                SelectedMovieCollection = null;
-            else if (index == 0)
-                SelectedMovieCollection = MovieCollections[MovieCollections.Count - 1];
-            else
-                SelectedMovieCollection = MovieCollections[index - 1];
+            SelectedMovieCollection = MovieCollections.GetNext(SelectedMovieCollection);
         }
-
-        #endregion
     }
 }

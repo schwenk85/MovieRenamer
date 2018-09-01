@@ -1,42 +1,35 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System;
+﻿using System;
 using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace MovieRenamer
 {
-    /// <summary>
-    /// Interaktionslogik für MainWindow.xaml
-    /// </summary>
-    public partial class MovieRenamerWindow : Window
+    public partial class MovieRenamerWindow
     {
-        #region Fields
-
-        WebClient _WebClient = new WebClient();
-
-        #endregion
-
-        #region Constructors
+        private readonly WebClient _webClient = new WebClient();
 
         public MovieRenamerWindow()
         {
             InitializeComponent();
         }
 
-        #endregion
-
-        #region Methods
-
         private void Navigate()
         {
             // Get URI to navigate to
-            Uri uri = new Uri(this.txtURL.Text, UriKind.RelativeOrAbsolute);
+            var uri = new Uri(TextBoxUrl.Text, UriKind.RelativeOrAbsolute);
 
             // Only absolute URIs can be navigated to
             if (!uri.IsAbsoluteUri)
-                System.Windows.MessageBox.Show("The Address URI must be absolute eg 'http://www.imdb.com/'");
+            {
+                MessageBox.Show("The Address URI must be absolute eg 'http://www.imdb.com/'");
+            }
             else
-                browser.Navigate(uri);
+            {
+                WebBrowser.Navigate(uri);
+            }
         }
 
         private string ReplaceSpecialSigns(string str)
@@ -54,97 +47,100 @@ namespace MovieRenamer
             return str;
         }
 
-        #endregion
-
-        #region Events
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            txtMainFolder.Focus();
+            TextBoxMainFolder.Focus();
         }
 
-        private void btnPreviousPage_Click(object sender, RoutedEventArgs e)
+        private void ButtonPreviousPage_Click(object sender, RoutedEventArgs e)
         {
-            if (browser.CanGoBack)
-                browser.GoBack();
+            if (WebBrowser.CanGoBack)
+            {
+                WebBrowser.GoBack();
+            }
         }
 
-        private void btnNextPage_Click(object sender, RoutedEventArgs e)
+        private void ButtonNextPage_Click(object sender, RoutedEventArgs e)
         {
-            if (browser.CanGoForward)
-                browser.GoForward();
+            if (WebBrowser.CanGoForward)
+            {
+                WebBrowser.GoForward();
+            }
         }
 
-        private void btnOpenUri_Click(object sender, RoutedEventArgs e)
+        private void ButtonOpenUri_Click(object sender, RoutedEventArgs e)
         {
             Navigate();
         }
 
-        private void btnOpenImdbDe_Click(object sender, RoutedEventArgs e)
+        private void ButtonOpenImdbDe_Click(object sender, RoutedEventArgs e)
         {
-            txtURL.Text = "http://www.imdb.de/";
+            TextBoxUrl.Text = "http://www.imdb.de/";
             Navigate();
         }
 
-        private void btnOpenImdbCom_Click(object sender, RoutedEventArgs e)
+        private void ButtonOpenImdbCom_Click(object sender, RoutedEventArgs e)
         {
-            txtURL.Text = "http://www.imdb.com/";
+            TextBoxUrl.Text = "http://www.imdb.com/";
             Navigate();
         }
 
-        private void btnOpenGoogle_Click(object sender, RoutedEventArgs e)
+        private void ButtonOpenGoogle_Click(object sender, RoutedEventArgs e)
         {
-            txtURL.Text = "http://www.google.de/";
+            TextBoxUrl.Text = "http://www.google.de/";
             Navigate();
         }
 
-        private void txtURL_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void TextBoxUrl_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Return ||
-                e.Key == System.Windows.Input.Key.Enter)
+            if (e.Key == Key.Return ||
+                e.Key == Key.Enter)
             {
                 Navigate();
             }
         }
 
-        private void browser_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        private void WebBrowser_Navigated(
+            object sender,
+            NavigationEventArgs eventArgs)
         {
-            btnPreviousPage.IsEnabled = ((WebBrowser)sender).CanGoBack;
-            btnNextPage.IsEnabled = ((WebBrowser)sender).CanGoForward;
+            ButtonPreviousPage.IsEnabled = ((WebBrowser) sender).CanGoBack;
+            ButtonNextPage.IsEnabled = ((WebBrowser) sender).CanGoForward;
 
-            if (e.Uri != null)
+            if (eventArgs.Uri != null)
             {
-                string uriString = e.Uri.OriginalString;
-                string source = string.Empty;
+                var uriString = eventArgs.Uri.OriginalString;
+                var source = string.Empty;
 
                 try
                 {
-                    source = _WebClient.DownloadString(uriString);
+                    source = _webClient.DownloadString(uriString);
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Source code from " + uriString + " cannot be read.\n\n" + ex.Message);
+                    MessageBox.Show("Source code from " + uriString + " cannot be read.\n\n" + ex.Message);
                 }
 
-                txtURL.Text = uriString;
-                txtMovieID.Text = string.Empty;
-                txtMovieName.Text = string.Empty;
-                txtSourceCode.Text = source;
+                TextBoxUrl.Text = uriString;
+                TextBoxMovieId.Text = string.Empty;
+                TextBoxMovieName.Text = string.Empty;
+                TextBoxSourceCode.Text = source;
 
-                string[] uriStringParts = uriString.Split('/');
-                foreach (string uriStringPart in uriStringParts)
+                var uriStringParts = uriString.Split('/');
+                foreach (var uriStringPart in uriStringParts)
                 {
                     if (uriStringPart.StartsWith("tt") && uriStringPart.Length == 9)
                     {
-                        txtMovieID.Text = uriStringPart;
+                        TextBoxMovieId.Text = uriStringPart;
 
                         if (!string.IsNullOrWhiteSpace(source))
                         {
-                            int indexTitleStart = source.LastIndexOf("<title>") + 7;
-                            int indexTitleEnd = source.LastIndexOf("</title>") - indexTitleStart;
+                            var indexTitleStart = source.LastIndexOf("<title>", StringComparison.Ordinal) + 7;
+                            var indexTitleEnd = source.LastIndexOf("</title>", StringComparison.Ordinal) -
+                                                indexTitleStart;
 
-                            string movieName = source.Substring(indexTitleStart, indexTitleEnd);
-                            txtMovieName.Text = ReplaceSpecialSigns(movieName);
+                            var movieName = source.Substring(indexTitleStart, indexTitleEnd);
+                            TextBoxMovieName.Text = ReplaceSpecialSigns(movieName);
                         }
 
                         break;
@@ -152,7 +148,5 @@ namespace MovieRenamer
                 }
             }
         }
-
-        #endregion
     }
 }

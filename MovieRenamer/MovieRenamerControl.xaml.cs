@@ -1,57 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Diagnostics;
 
 namespace MovieRenamer
 {
-    /// <summary>
-    /// Interaktionslogik für MovieRenamerControl.xaml
-    /// </summary>
-    public partial class MovieRenamerControl : UserControl
+    public partial class MovieRenamerControl
     {
-        #region Constructors
-        
         public MovieRenamerControl()
         {
             InitializeComponent();
         }
 
-        #endregion
-
-        #region Events
-        
-        private void OnChildGotFocus(object sender, RoutedEventArgs e)
+        private void OnChildGotFocus(object sender, RoutedEventArgs eventArgs)
         {
-            TextBox textBox = (TextBox)sender;
-            lbxOriginalFileNames.SelectedItem = textBox.DataContext;
-            //lbxNewFileNames.SelectedItem = textBox.DataContext;
+            if (sender is TextBox textBox)
+            {
+                ListBoxOriginalFileNames.SelectedItem = textBox.DataContext;
+            }
         }
 
-        private void OnPreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void OnPreviewTextInput(object sender, TextCompositionEventArgs eventArgs)
         {
-            if (string.IsNullOrEmpty(e.Text.RemoveBadCharacters()))
-                e.Handled = true;
+            if (string.IsNullOrEmpty(eventArgs.Text.RemoveBadCharacters()))
+            {
+                eventArgs.Handled = true;
+            }
         }
 
-        private void btnPlay_Click(object sender, RoutedEventArgs e)
+        private void ButtonPlay_Click(object sender, RoutedEventArgs eventArgs)
         {
-            Button button = (Button)sender;
-            MovieFile movieFile = (MovieFile)button.DataContext;
-            Process.Start(movieFile.OriginalMovieFile.FullName);
+            if (sender is Button button)
+            {
+                if (button.DataContext is MovieFile movieFile)
+                {
+                    Process.Start(movieFile.OriginalMovieFile.FullName);
+                }
+            }
         }
-
-        #endregion
-
     }
 }

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Data;
-using System.Windows.Media;
 using System.Globalization;
 using System.IO;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace MovieRenamer.MVVM.Converters
 {
@@ -13,10 +10,9 @@ namespace MovieRenamer.MVVM.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null)
+            if (value != null && Directory.Exists((string) value))
             {
-                if (Directory.Exists((string)value))
-                    return Brushes.Black;
+                return Brushes.Black;
             }
 
             return Brushes.Red;

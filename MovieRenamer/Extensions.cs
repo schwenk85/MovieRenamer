@@ -1,32 +1,67 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Linq;
 
 namespace MovieRenamer
 {
     /// <summary>
-    /// Source: http://kiwigis.blogspot.de/2010/03/how-to-sort-obversablecollection.html
+    /// Extended Collection/List functionality
     /// </summary>
     public static class ListExtensions
     {
+        /// <summary>
+        /// Algorithm to sort a list or an collection.
+        /// Source: http://kiwigis.blogspot.de/2010/03/how-to-sort-obversablecollection.html
+        /// </summary>
         public static void BubbleSort(this IList list)
         {
-            for (int i = list.Count - 1; i >= 0; i--)
+            for (var i = list.Count - 1; i >= 0; i--)
             {
-                for (int j = 1; j <= i; j++)
+                for (var j = 1; j <= i; j++)
                 {
-                    object item1 = list[j - 1];
-                    object item2 = list[j];
+                    var item1 = list[j - 1];
+                    var item2 = list[j];
                     if (((IComparable)item1).CompareTo(item2) > 0)
                     {
                         list.Remove(item1);
                         list.Insert(j, item1);
                     }
                 }
+            }
+        }
+
+        public static T GetPrevious<T>(this IList<T> list, T item)
+        {
+            var index = list.IndexOf(item);
+
+            if (index < 0)
+            {
+                throw new ItemNotInCollectionException<T>(item);
+            }
+
+            return index == 0 ? list.Last() : list[index - 1];
+        }
+
+        public static T GetNext<T>(this IList<T> list, T item)
+        {
+            var index = list.IndexOf(item);
+
+            if (index < 0)
+            {
+                throw new ItemNotInCollectionException<T>(item);
+            }
+
+            return index == list.Count - 1 ? list.First() : list[index + 1];
+        }
+
+        private class ItemNotInCollectionException<T> : Exception
+        {
+            public ItemNotInCollectionException(T item)
+                : base($"Collection does not contain '{item}'.")
+            {
             }
         }
     }
@@ -38,9 +73,9 @@ namespace MovieRenamer
     {
         public static string RemoveBadCharacters(this string str)
         {
-            string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-            Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
-            return r.Replace(str, string.Empty);
+            var regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            var regex = new Regex($"[{Regex.Escape(regexSearch)}]");
+            return regex.Replace(str, string.Empty);
         }
     }
 }

@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Data;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Data;
 
 namespace MovieRenamer.MVVM.Converters
 {
-     public class MovieCollectionsCountConverter : IValueConverter
+    public class MovieCollectionsCountConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null)
-            {
-                return ((MovieCollections)value).Count;
-            }
-
-            return 0;
+            return ((ObservableCollection<MovieCollection>) value)?.Count ?? 0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

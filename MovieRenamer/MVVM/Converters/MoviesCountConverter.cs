@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Data;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Data;
 
 namespace MovieRenamer.MVVM.Converters
 {
@@ -11,11 +9,11 @@ namespace MovieRenamer.MVVM.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            int counter = 0;
+            var counter = 0;
 
             if (value != null)
             {
-                foreach (MovieCollection movieCollection in (MovieCollections)value)
+                foreach (var movieCollection in (ObservableCollection<MovieCollection>) value)
                 {
                     counter += movieCollection.Movies.Count;
                 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Windows.Data;
 using System.Globalization;
 using System.Windows;
@@ -14,13 +12,14 @@ namespace MovieRenamer.MVVM.Converters
         {
             if (values != null && values.Length > 1)
             {
-                if (values[0] != DependencyProperty.UnsetValue && 
-                    values[1] != DependencyProperty.UnsetValue)
+                if (values[0] != DependencyProperty.UnsetValue && values[1] != DependencyProperty.UnsetValue)
                 {
-                    MovieCollection selectedMovieCollecion = (MovieCollection)values[0];
-                    MovieCollections MovieCollections = (MovieCollections)values[1];
+                    var selectedMovieCollection = (MovieCollection)values[0];
+                    var movieCollections = (ObservableCollection<MovieCollection>)values[1];
 
-                    return (MovieCollections.IndexOf(selectedMovieCollecion) + 1).ToString() + "/" + MovieCollections.Count.ToString();
+                    return 
+                        (movieCollections.IndexOf(selectedMovieCollection) + 1).ToString() +
+                        "/" + movieCollections.Count.ToString();
                 }
             }
 

@@ -1,226 +1,276 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MovieRenamer.MVVM;
-using System.IO;
-using System.Windows.Input;
-using MovieRenamer.MVVM.Commands;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Windows.Input;
+using MovieRenamer.MVVM;
+using MovieRenamer.MVVM.Commands;
 
 namespace MovieRenamer
 {
-    public class MovieCollection : ObservableObject, IComparable
+    public class MovieCollection : ObservableObject,
+        IComparable
     {
-        #region Fields
+        private string _imdbId = string.Empty;
+        private string _imdbMovieName = string.Empty;
+        private MovieCollectionDirectory _movieCollectionDirectory = new MovieCollectionDirectory();
+        private ObservableCollection<MovieFile> _movies = new ObservableCollection<MovieFile>();
 
-        protected MovieCollectionDirectory _MovieCollectionDirectory;
-        protected MovieFiles _Movies;
-        protected MovieFile _SelectedMovie;
+        private RelayCommand _openMovieFolderCommand;
+        private RelayCommand _renameMovieCommand;
+        private RelayCommand _renameMovieFolderCommand;
+        private RelayCommand _reScanMovieCollectionCommand;
+        private RelayCommand _resetMovieCollectionCommand;
+        private RelayCommand _saveMovieCollectionCommand;
+        private RelayCommand _searchMovieCommand;
+        private RelayCommand _searchMovieFolderCommand;
 
-        protected string _SearchString;
-        protected string _ImdbId;
-        protected string _ImdbMovieName;
-
-        #endregion
-        
-        #region Constructors
-
-        public MovieCollection(MovieCollections parent)
-        {
-            Parent = parent;
-
-            _MovieCollectionDirectory = new MovieCollectionDirectory(this);
-            _Movies = new MovieFiles(this);
-            _SelectedMovie = null;
-
-            _SearchString = string.Empty;
-            _ImdbId = string.Empty;
-            _ImdbMovieName = string.Empty;
-
-            MovieCollectionOpen = new MovieCollection_OpenCommand(this);
-            MovieCollectionReScan = new MovieCollection_ReScanCommand(this);
-            MovieCollectionReset = new MovieCollection_ResetCommand(this);
-            MovieCollectionSave = new MovieCollection_SaveCommand(this);
-            SearchMovieFolder = new MovieCollection_SearchMovieFolderCommand(this);
-            SearchMovie = new MovieCollection_SearchMovieCommand(this);
-            RenameMovieFolder = new MovieCollection_RenameMovieFolderCommand(this);
-            RenameMovie = new MovieCollection_RenameMovieCommand(this);
-        }
-
-        #endregion
-
-        #region Data Properties
-
-        public MovieCollections Parent { get; set; }
+        private string _searchString = string.Empty;
+        private MovieFile _selectedMovie;
 
         public MovieCollectionDirectory MovieCollectionDirectory
         {
-            get { return _MovieCollectionDirectory; }
-            set
-            {
-                _MovieCollectionDirectory = value;
-                base.RaisePropertyChangedEvent("MovieCollectionDirectory");
-            }
+            get => _movieCollectionDirectory;
+            set => SetProperty(ref _movieCollectionDirectory, value);
         }
 
-        public MovieFiles Movies
+        public ObservableCollection<MovieFile> Movies
         {
-            get { return _Movies; }
-            set
-            {
-                _Movies = value;
-                base.RaisePropertyChangedEvent("Movies");
-            }
+            get => _movies;
+            set => SetProperty(ref _movies, value);
         }
 
         public MovieFile SelectedMovie
         {
-            get { return _SelectedMovie; }
-            set
-            {
-                _SelectedMovie = value;
-                //SetImdbSearchString();
-                base.RaisePropertyChangedEvent("SelectedMovie");
-            }
+            get => _selectedMovie;
+            set => SetProperty(ref _selectedMovie, value);
         }
 
         public string SearchString
         {
-            get { return _SearchString; }
-            set
-            {
-                _SearchString = value;
-                base.RaisePropertyChangedEvent("SearchString");
-            }
+            get => _searchString;
+            set => SetProperty(ref _searchString, value);
         }
 
         public string ImdbId
         {
-            get { return _ImdbId; }
-            set
-            {
-                _ImdbId = value;
-                base.RaisePropertyChangedEvent("ImdbId");
-            }
+            get => _imdbId;
+            set => SetProperty(ref _imdbId, value);
         }
 
         public string ImdbMovieName
         {
-            get { return _ImdbMovieName; }
-            set
+            get => _imdbMovieName;
+            set => SetProperty(ref _imdbMovieName, value);
+        }
+
+        public ICommand OpenMovieFolderCommand
+        {
+            get
             {
-                _ImdbMovieName = value;
-                base.RaisePropertyChangedEvent("ImdbMovieName");
+                return _openMovieFolderCommand ?? (_openMovieFolderCommand =
+                           new RelayCommand(param => OpenMovieFolder()));
             }
         }
 
-        #endregion
-
-        #region Command Properties
-
-        public ICommand MovieCollectionOpen { get; set; }
-        public ICommand MovieCollectionReScan { get; set; }
-        public ICommand MovieCollectionReset { get; set; }
-        public ICommand MovieCollectionSave { get; set; }
-        public ICommand SearchMovieFolder { get; set; }
-        public ICommand SearchMovie { get; set; }
-        public ICommand RenameMovieFolder { get; set; }
-        public ICommand RenameMovie { get; set; }
-
-        #endregion
-
-        #region Methods
-
-        public void Read(DirectoryInfo movieCollectionDirectory)
+        public ICommand ReScanMovieCollectionCommand
         {
-            MovieCollectionDirectory.Read(movieCollectionDirectory);
-            Movies.Read(movieCollectionDirectory);
-
-            if (Movies.Count > 0)
-                SelectedMovie = Movies[0];
+            get
+            {
+                return _reScanMovieCollectionCommand ?? (_reScanMovieCollectionCommand =
+                           new RelayCommand(param => Read(MovieCollectionDirectory.OriginalMovieCollectionDirectory)));
+            }
         }
 
-        public void Reset()
+        public ICommand ResetMovieCollectionCommand
         {
-            MovieCollectionDirectory.Reset();
-            Movies.Reset();
+            get
+            {
+                return _resetMovieCollectionCommand ?? (_resetMovieCollectionCommand =
+                           new RelayCommand(param => Reset()));
+            }
         }
 
-        public void Write()
+        public ICommand SaveMovieCollectionCommand
         {
-            Movies.Write();
-            MovieCollectionDirectory.Write();
-
-            this.Read(MovieCollectionDirectory.OriginalMovieCollectionDirectory);
+            get
+            {
+                return _saveMovieCollectionCommand ?? (_saveMovieCollectionCommand =
+                           new RelayCommand(param => Write()));
+            }
         }
 
-        public void Open()
+        public ICommand SearchMovieFolderCommand
+        {
+            get
+            {
+                return _searchMovieFolderCommand ?? (_searchMovieFolderCommand =
+                           new RelayCommand(param => SearchMovieFolder(), param => MovieCollectionDirectory != null));
+            }
+        }
+
+        public ICommand SearchMovieCommand
+        {
+            get
+            {
+                return _searchMovieCommand ?? (_searchMovieCommand =
+                           new RelayCommand(param => SearchMovie(), param => SelectedMovie != null));
+            }
+        }
+
+        public ICommand RenameMovieFolderCommand
+        {
+            get
+            {
+                return _renameMovieFolderCommand ?? (_renameMovieFolderCommand =
+                           new RelayCommand(param => SetMovieCollectionDirectoryName()));
+            }
+        }
+
+        public ICommand RenameMovieCommand
+        {
+            get
+            {
+                return _renameMovieCommand ?? (_renameMovieCommand =
+                           new RelayCommand(
+                               param => SetSelectedMovieNewMovieName(),
+                               param => SelectedMovie != null));
+            }
+        }
+
+        public int CompareTo(object obj)
+        {
+            var movieCollection = obj as MovieCollection;
+            if (movieCollection == null)
+            {
+                throw new ArgumentException("Object is not a MovieCollection");
+            }
+
+            return string.Compare(
+                MovieCollectionDirectory.OriginalMovieCollectionName,
+                movieCollection.MovieCollectionDirectory.OriginalMovieCollectionName,
+                StringComparison.Ordinal);
+        }
+
+        private void OpenMovieFolder()
         {
             Process.Start(MovieCollectionDirectory.OriginalMovieCollectionDirectory.FullName);
         }
 
-        public void SetImdbSearchString(string movieName)
+        public void Read(DirectoryInfo movieCollectionDirectory)
         {
-            string cleanedMovieName = RemoveBracketParts(movieName);
+            MovieCollectionDirectory.Read(movieCollectionDirectory);
 
-            string[] movieNameParts = cleanedMovieName.Split(new char[] { ' ', '.', '_' });
-
-            string chain = string.Empty;
-
-            int intTemp = 0;
-
-            foreach (string movieNamePart in movieNameParts)
+            if (movieCollectionDirectory.Exists)
             {
-                if (!string.IsNullOrWhiteSpace(movieNamePart) && 
-                    !(movieNamePart.Length == 4 && Int32.TryParse(movieNamePart, out intTemp)) &&
-                    movieNamePart != "-")
-                    chain += movieNamePart + "+";
+                Movies.Clear();
+
+                foreach (var movieFile in movieCollectionDirectory.GetFiles())
+                {
+                    var movie = new MovieFile();
+                    movie.Read(movieFile);
+                    Movies.Add(movie);
+                }
+
+                Movies.BubbleSort();
             }
 
-            SearchString = "http://www.imdb.de/find?q=" + chain.TrimEnd(new char[] { '+' }); //+ "&s=all";
+            if (Movies.Any())
+            {
+                SelectedMovie = Movies[0];
+            }
         }
 
-        private string RemoveBracketParts(string str)
+        private void Reset()
+        {
+            MovieCollectionDirectory.Reset();
+
+            foreach (var movie in Movies)
+            {
+                movie.Reset();
+            }
+        }
+
+        private void Write()
+        {
+            foreach (var movie in Movies)
+            {
+                movie.Write();
+            }
+
+            MovieCollectionDirectory.Write();
+
+            Read(MovieCollectionDirectory.OriginalMovieCollectionDirectory);
+        }
+
+        private void SetImdbSearchString(string movieName)
+        {
+            var cleanedMovieName = RemoveBracketParts(movieName);
+
+            var movieNameParts = cleanedMovieName.Split(' ', '.', '_');
+
+            var chain = string.Empty;
+
+            foreach (var movieNamePart in movieNameParts)
+            {
+                if (!string.IsNullOrWhiteSpace(movieNamePart) &&
+                    !(movieNamePart.Length == 4 && int.TryParse(movieNamePart, out _)) &&
+                    movieNamePart != "-")
+                {
+                    chain += movieNamePart + "+";
+                }
+            }
+
+            SearchString = "http://www.imdb.de/find?q=" + chain.TrimEnd('+'); //+ "&s=all";
+        }
+
+        private static string RemoveBracketParts(string str)
         {
             while (str.Contains("(") && str.Contains(")"))
-                str = str.Remove(str.IndexOf("("), str.IndexOf(")") + 1 - str.IndexOf("("));
+            {
+                str = str.Remove(
+                    str.IndexOf("(", StringComparison.Ordinal),
+                    str.IndexOf(")", StringComparison.Ordinal) + 1 - str.IndexOf("(", StringComparison.Ordinal));
+            }
 
             while (str.Contains("[") && str.Contains("]"))
-                str = str.Remove(str.IndexOf("["), str.IndexOf("]") + 1 - str.IndexOf("["));
+            {
+                str = str.Remove(
+                    str.IndexOf("[", StringComparison.Ordinal),
+                    str.IndexOf("]", StringComparison.Ordinal) + 1 - str.IndexOf("[", StringComparison.Ordinal));
+            }
 
             return str;
         }
 
-        public void SetSelectedMovieNewMovieName()
+        private void SetSelectedMovieNewMovieName()
         {
             SelectedMovie.NewMovieName = ImdbMovieName + " [" + ImdbId + "]";
         }
 
-        public void SetMovieCollectionDirectoryName()
+        private void SetMovieCollectionDirectoryName()
         {
-            string movieFolderName = RemoveBracketParts(ImdbMovieName).Trim();
+            var movieFolderName = RemoveBracketParts(ImdbMovieName).Trim();
 
             if (movieFolderName.Contains(" - "))
-                movieFolderName = movieFolderName.Remove(movieFolderName.IndexOf(" - "));
+            {
+                movieFolderName = movieFolderName.Remove(movieFolderName.IndexOf(" - ", StringComparison.Ordinal));
+            }
 
             MovieCollectionDirectory.NewMovieCollectionName = movieFolderName;
         }
 
-        #endregion
-
-        #region Compare
-
-        public int CompareTo(object obj)
+        private void SearchMovie()
         {
-            MovieCollection movieCollection = obj as MovieCollection;
-            if (movieCollection == null)
-            {
-                throw new ArgumentException("Object is not MovieCollection");
-            }
-            return this.MovieCollectionDirectory.OriginalMovieCollectionName.CompareTo(movieCollection.MovieCollectionDirectory.OriginalMovieCollectionName);
+            var movieName = SelectedMovie.OriginalMovieName;
+            SetImdbSearchString(movieName);
         }
 
-        #endregion
+        private void SearchMovieFolder()
+        {
+            var movieName = MovieCollectionDirectory.OriginalMovieCollectionName;
+            SetImdbSearchString(movieName);
+        }
     }
 }
