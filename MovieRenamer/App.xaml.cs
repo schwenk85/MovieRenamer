@@ -1,31 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 
 namespace MovieRenamer
 {
-    /// <summary>
-    /// Interaktionslogik für "App.xaml"
-    /// </summary>
-    public partial class App : Application
+    public partial class App
     {
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
-            MovieRenamerViewModel viewModel = new MovieRenamerViewModel();
-            MovieRenamerWindow movieRenamer = new MovieRenamerWindow();
-            movieRenamer.DataContext = viewModel;
+            
+            var movieRenamer = new MovieRenamerWindow
+            {
+                DataContext = new MovieRenamerViewModel()
+            };
             movieRenamer.ShowDialog();
-            this.Shutdown();
-
-
-            //TODO: Wishlist
-            // - Fensterposition, Gridsplitterpositionen, Textboxinhalte usw. speichern/wiederherstellen
-
+            Shutdown();
         }
     }
 }
