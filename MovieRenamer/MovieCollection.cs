@@ -9,8 +9,7 @@ using MovieRenamer.MVVM.Commands;
 
 namespace MovieRenamer
 {
-    public class MovieCollection : ObservableObject,
-        IComparable
+    public class MovieCollection : ObservableObject, IComparable
     {
         private string _imdbId = string.Empty;
         private string _imdbMovieName = string.Empty;
@@ -141,16 +140,16 @@ namespace MovieRenamer
 
         public int CompareTo(object obj)
         {
-            var movieCollection = obj as MovieCollection;
-            if (movieCollection == null)
+            if (obj is MovieCollection movieCollection)
             {
-                throw new ArgumentException("Object is not a MovieCollection");
+                return string.Compare(
+                    MovieCollectionDirectory.OriginalMovieCollectionName,
+                    movieCollection.MovieCollectionDirectory.OriginalMovieCollectionName,
+                    StringComparison.Ordinal);
             }
 
-            return string.Compare(
-                MovieCollectionDirectory.OriginalMovieCollectionName,
-                movieCollection.MovieCollectionDirectory.OriginalMovieCollectionName,
-                StringComparison.Ordinal);
+            throw new ArgumentException("Object is not a MovieCollection");
+
         }
 
         private void OpenMovieFolder()

@@ -4,9 +4,9 @@ using System.Windows.Input;
 namespace MovieRenamer.MVVM.Commands
 {
     /// <summary>
-    /// A reusable ICommand
-    /// Relay Command: https://msdn.microsoft.com/en-us/magazine/dd419663.aspx#id0090030
-    /// Delegate Command with "canExecute": https://www.wpftutorial.net/DelegateCommand.html
+    ///     A reusable ICommand
+    ///     Relay Command: https://msdn.microsoft.com/en-us/magazine/dd419663.aspx#id0090030
+    ///     Delegate Command with "canExecute": https://www.wpftutorial.net/DelegateCommand.html
     /// </summary>
     public class RelayCommand : ICommand
     {
@@ -20,7 +20,7 @@ namespace MovieRenamer.MVVM.Commands
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
-        
+
         public void Execute(object parameter)
         {
             _execute(parameter);

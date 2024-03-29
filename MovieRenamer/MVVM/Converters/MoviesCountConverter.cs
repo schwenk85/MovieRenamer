@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Data;
 
 namespace MovieRenamer.MVVM.Converters
@@ -13,10 +14,8 @@ namespace MovieRenamer.MVVM.Converters
 
             if (value != null)
             {
-                foreach (var movieCollection in (ObservableCollection<MovieCollection>) value)
-                {
-                    counter += movieCollection.Movies.Count;
-                }
+                var movieCollections = (ObservableCollection<MovieCollection>) value;
+                counter += movieCollections.Sum(movieCollection => movieCollection.Movies.Count);
             }
 
             return counter;

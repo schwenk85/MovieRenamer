@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,21 +32,6 @@ namespace MovieRenamer
             {
                 WebBrowser.Navigate(uri);
             }
-        }
-
-        private string ReplaceSpecialSigns(string str)
-        {
-            str = str.Replace("&#xC4;", "Ä");
-            str = str.Replace("&#xD6;", "Ö");
-            str = str.Replace("&#xDC;", "Ü");
-            str = str.Replace("&#xE4;", "ä");
-            str = str.Replace("&#xF6;", "ö");
-            str = str.Replace("&#xFC;", "ü");
-            str = str.Replace("&#xDF;", "ß");
-            str = str.Replace("&#x26;", "&");
-            str = str.Replace("&#x27;", "'");
-
-            return str;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -107,46 +94,68 @@ namespace MovieRenamer
             ButtonPreviousPage.IsEnabled = ((WebBrowser) sender).CanGoBack;
             ButtonNextPage.IsEnabled = ((WebBrowser) sender).CanGoForward;
 
-            if (eventArgs.Uri != null)
+            if (eventArgs.Uri == null)
             {
-                var uriString = eventArgs.Uri.OriginalString;
-                var source = string.Empty;
+                return;
+            }
 
-                try
-                {
-                    source = _webClient.DownloadString(uriString);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Source code from " + uriString + " cannot be read.\n\n" + ex.Message);
-                }
+            var uriString = eventArgs.Uri.OriginalString;
+            var source = string.Empty;
 
-                TextBoxUrl.Text = uriString;
-                TextBoxMovieId.Text = string.Empty;
-                TextBoxMovieName.Text = string.Empty;
-                TextBoxSourceCode.Text = source;
+            try
+            {
+                source = _webClient.DownloadString(uriString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Source code from " + uriString + " cannot be read.\n\n" + ex.Message);
+            }
 
-                var uriStringParts = uriString.Split('/');
-                foreach (var uriStringPart in uriStringParts)
+            TextBoxUrl.Text = uriString;
+            TextBoxMovieId.Text = string.Empty;
+            TextBoxMovieName.Text = string.Empty;
+            TextBoxSourceCode.Text = source;
+
+            var uriStringParts = uriString.Split('/');
+            foreach (var uriStringPart in uriStringParts)
+            {
+                if (uriStringPart.StartsWith("tt") && uriStringPart.Length == 9)
                 {
-                    if (uriStringPart.StartsWith("tt") && uriStringPart.Length == 9)
+                    TextBoxMovieId.Text = uriStringPart;
+
+                    if (!string.IsNullOrWhiteSpace(source))
                     {
-                        TextBoxMovieId.Text = uriStringPart;
+                        var indexTitleStart = source.LastIndexOf("<title>", StringComparison.Ordinal) + 7;
+                        var indexTitleEnd = source.LastIndexOf("</title>", StringComparison.Ordinal) -
+                                            indexTitleStart;
 
-                        if (!string.IsNullOrWhiteSpace(source))
-                        {
-                            var indexTitleStart = source.LastIndexOf("<title>", StringComparison.Ordinal) + 7;
-                            var indexTitleEnd = source.LastIndexOf("</title>", StringComparison.Ordinal) -
-                                                indexTitleStart;
-
-                            var movieName = source.Substring(indexTitleStart, indexTitleEnd);
-                            TextBoxMovieName.Text = ReplaceSpecialSigns(movieName);
-                        }
-
-                        break;
+                        var movieName = source.Substring(indexTitleStart, indexTitleEnd);
+                        TextBoxMovieName.Text = ReplaceSpecialSigns(movieName);
                     }
+
+                    break;
                 }
             }
+        }
+
+        private static string ReplaceSpecialSigns(string str)
+        {
+            var replacements = new Dictionary<string, string>
+            {
+                {"&#xC4;", "Ä"},
+                {"&#xD6;", "Ö"},
+                {"&#xDC;", "Ü"},
+                {"&#xE4;", "ä"},
+                {"&#xF6;", "ö"},
+                {"&#xFC;", "ü"},
+                {"&#xDF;", "ß"},
+                {"&#x26;", "&"},
+                {"&#x27;", "'"}
+            };
+
+            return replacements.Aggregate(str,
+                (current, replacement)
+                    => current.Replace(replacement.Key, replacement.Value));
         }
     }
 }

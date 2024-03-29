@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MovieRenamer
 {
     /// <summary>
-    /// Extended Collection/List functionality
+    ///     Extended Collection/List functionality
     /// </summary>
     public static class ListExtensions
     {
         /// <summary>
-        /// Algorithm to sort a list or an collection.
-        /// Source: http://kiwigis.blogspot.de/2010/03/how-to-sort-obversablecollection.html
+        ///     Algorithm to sort a list or a collection.
+        ///     Source: http://kiwigis.blogspot.de/2010/03/how-to-sort-obversablecollection.html
         /// </summary>
         public static void BubbleSort(this IList list)
         {
@@ -59,15 +59,12 @@ namespace MovieRenamer
 
         private class ItemNotInCollectionException<T> : Exception
         {
-            public ItemNotInCollectionException(T item)
-                : base($"Collection does not contain '{item}'.")
-            {
-            }
+            public ItemNotInCollectionException(T item) : base($"Collection does not contain '{item}'.") { }
         }
     }
 
     /// <summary>
-    /// Source: http://stackoverflow.com/questions/146134/how-to-remove-illegal-characters-from-path-and-filenames
+    ///     Source: http://stackoverflow.com/questions/146134/how-to-remove-illegal-characters-from-path-and-filenames
     /// </summary>
     public static class StringExtensions
     {

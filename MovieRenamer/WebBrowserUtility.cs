@@ -16,6 +16,7 @@ namespace MovieRenamer
                 typeof(WebBrowserUtility),
                 new UIPropertyMetadata(null, BindableSourcePropertyChanged));
 
+        // ReSharper disable once UnusedMember.Global
         public static string GetBindableSource(DependencyObject obj)
         {
             return (string) obj.GetValue(BindableSourceProperty);

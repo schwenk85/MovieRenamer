@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace MovieRenamer.MVVM.Converters
 {
-    class SelectedMovieCollectionToStringConverter : IMultiValueConverter
+    public class SelectedMovieCollectionToStringConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -17,9 +17,7 @@ namespace MovieRenamer.MVVM.Converters
                     var selectedMovieCollection = (MovieCollection)values[0];
                     var movieCollections = (ObservableCollection<MovieCollection>)values[1];
 
-                    return 
-                        (movieCollections.IndexOf(selectedMovieCollection) + 1).ToString() +
-                        "/" + movieCollections.Count.ToString();
+                    return movieCollections.IndexOf(selectedMovieCollection) + 1 + "/" + movieCollections.Count;
                 }
             }
 
